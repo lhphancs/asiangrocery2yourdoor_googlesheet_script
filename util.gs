@@ -34,3 +34,9 @@ function isBlankVal(val){
 function isSameWord(word1, word2){
   return word1.toUpperCase() == word2.toUpperCase();
 }
+
+function cellIsRed(sheet, rowIndex, colIndex){
+  var range = sheet.getRange(rowIndex+1, colIndex+1);
+  var cellBackgroundColor = range.getBackground();
+  return cellBackgroundColor == '#ff0000';
+}

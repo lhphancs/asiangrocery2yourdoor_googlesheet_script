@@ -6,46 +6,53 @@ Coder Note:
 */
 
 function executeScript(scriptFunction, e){
+  var lock = LockService.getDocumentLock();
   try{
-    scriptFunction(e);
+    while( !lock.tryLock(3000) ){
+      continue;
+    }
+    try{
+      scriptFunction(e);
+    }
+    catch(error){
+       displayMsg(error, "Error");
+    }
+      
   }
   catch(error){
-    // Need this check because script runs even if they type in non OOS col, 
-    if(error != undefined)
-      displayMsg(error, "Error");
+    displayMsg(error, "Error");
   }
-}
-
-function executeFillLocation(e){
-  var wholesaleSpreadSheet = SpreadsheetApp.openById(READ_WHOLESALE_SPREADSHEET_ID);
-  fillLocation(wholesaleSpreadSheet, WHOLESALE_HEADER_ASIN);
+  finally{
+    lock.releaseLock();
+  }
 }
 
 function executeFillRepurchase(e){
   var wholesaleSpreadSheet = SpreadsheetApp.openById(READ_WHOLESALE_SPREADSHEET_ID);
-  var wholesaleHeadersObj = new WholesaleHeaders(WHOLESALE_HEADER_ASIN, WHOLESALE_HEADER_PACK
-                          , WHOLESALE_HEADER_BOX_AMT, WHOLESALE_HEADER_STOCK_NO, WHOLESALE_HEADER_PRODUCT_NAME);
-  fillRepurchase(e, wholesaleSpreadSheet, wholesaleHeadersObj);
+  fillRepurchase(wholesaleSpreadSheet, e);
 }
 
-function executeFillWhiteRowsBtn(e){
+function fillLocationsRedRowsAndUnsent(e){
+  var wholesaleSpreadSheet = SpreadsheetApp.openById(READ_WHOLESALE_SPREADSHEET_ID);
+  
+  fillLocation(wholesaleSpreadSheet);
+  fillRedRows(wholesaleSpreadSheet);
+  fillUnsent(wholesaleSpreadSheet);
+  displayMsg("Scripts ran successfully!", "Update Complete");
+}
+
+function onBtnFillWhiteRows(e){
   displayMsgScriptRunning();
-  fillWhiteRowsBtn();
+  executeScript(fillWhiteRows, e);
+}
+
+function onRunAllScriptsBtn(e){
+  displayMsgScriptRunning();
+  executeScript(fillLocationsRedRowsAndUnsent, e);
 }
 
 
 // Note: 'onEdit' is a reserve function for googlesheet script. Can't use onEdit directly due to permission error.
 function onCellEdit(e){
-  executeScript(executeFillRepurchase, e);
-}
-
-function onClickFillLocationBtn(e){
-  displayMsgScriptRunning();
-  executeScript(executeFillLocation, e);
-  displayMsg("Script successfully wrote locations", "Update Complete");
-}
-
-function onClickFillWhiteRowsBtn(e){
-  executeScript(executeFillWhiteRowsBtn, e);
-  displayMsg("Script successfully wrote white rows.", "Update Complete");
+  executeScript(onEditCheckHeadersAndRespond, e);
 }

@@ -1,4 +1,4 @@
-function fillWhiteRowsBtn(){
+function fillWhiteRows(){
   var activeSheet = SpreadsheetApp.getActiveSheet();
   var activeSheetInfo = new SheetInfo(activeSheet);
   
@@ -11,12 +11,13 @@ function fillWhiteRowsBtn(){
     var range = activeSheet.getRange(i+1, productNameCoordinate.colIndex+1);
     var cellBackgroundColor = range.getBackground();
     
-    if(cellBackgroundColor == '#ffffff'){
-      var unitSoldAmtLast30DaysCellVal = activeSheetValues[i][unitSoldAmtLast30DaysCoordinate.colIndex];
-      var sendAmt = 1.5*unitSoldAmtLast30DaysCellVal;
+    var unitSoldAmtLast30DaysCellVal = activeSheetValues[i][unitSoldAmtLast30DaysCoordinate.colIndex];
+    if(typeof unitSoldAmtLast30DaysCellVal == 'number' && cellBackgroundColor == '#ffffff'){
+      var sendAmt = Math.ceil(1.5*unitSoldAmtLast30DaysCellVal);
       var formattedDate = Utilities.formatDate(new Date(), "PST", "MM/dd");
       var writeCellValue = formattedDate + " Send " + sendAmt;
       activeSheet.getRange(i+1, myCommentCoordinate.colIndex+1).setValue(writeCellValue);
     }
   }
+  displayMsg("Scripts ran successfully!", "Update Complete");
 }

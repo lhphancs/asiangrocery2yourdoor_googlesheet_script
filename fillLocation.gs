@@ -1,4 +1,4 @@
-function fillLocation(wholesaleSpreadSheet, WHOLESALE_HEADER_ASIN) {
+function fillLocation(wholesaleSpreadSheet) {
   var writeHeaders = ['shelf location']; //These headers will have column written. Can add more to this array like 'product name'.
   
   var writeSheet = SpreadsheetApp.getActiveSheet();
@@ -91,7 +91,7 @@ function writeLocation(writeSheet, writeSheetInfo, wholesaleDataDict, writeKeyRo
   var sheetValues = writeSheetInfo.sheetValues;
   
   // rowIndex has + 1 because we want to skip the header
-  for(rowIndex = writeKeyRowColCoordinate.rowIndex + 1; rowIndex < writeSheetInfo.amtRow; ++rowIndex){
+  for(var rowIndex = writeKeyRowColCoordinate.rowIndex + 1; rowIndex < writeSheetInfo.amtRow; ++rowIndex){
     var keyCellVal = sheetValues[rowIndex][writeKeyColIndex];
     if(keyCellVal in wholesaleDataDict){
       for(var header in dictOfWriteHeadersRowColCoordinate){

@@ -28,12 +28,17 @@ var SheetInfo = function(sheet){
   this.sheetValues = sheet.getRange(1, 1, this.amtRow, this.amtCol).getValues(); //Retrives values as 2d array
 }
 
-var ReplenishHeaderCoordinates = function(asinCoord, unitSoldLast30DaysCoord, oosCoord){
+var ReplenishHeaderCoordinates = function(asinCoord, unitSoldLast30DaysCoord, oosCoord, asinListAddOrDeleteCoord){
   this.asin = asinCoord;
   this.unitSoldAmtLast30Days = unitSoldLast30DaysCoord;
   this.oos = oosCoord;
+  this.asinListAddOrDelete = asinListAddOrDeleteCoord;
   
-  this.hasAllCoordinates = asinCoord != undefined && unitSoldLast30DaysCoord != undefined && oosCoord != undefined;
+  this.hasAllCoordinates = asinCoord != undefined && unitSoldLast30DaysCoord != undefined
+  && oosCoord != undefined && asinListAddOrDeleteCoord != undefined
+  && this.asin.rowIndex == this.unitSoldAmtLast30Days.rowIndex
+  && this.asin.rowIndex == this.oos.rowIndex
+  && this.asin.rowIndex == this.asinListAddOrDelete.rowIndex;
 }
 
 var RepurchaseHeaderCoordinates = function(stockNoCoord, roundedRepurchaseAmtCoord, repurchaseAmtCoord, productNameCoord){
@@ -43,7 +48,10 @@ var RepurchaseHeaderCoordinates = function(stockNoCoord, roundedRepurchaseAmtCoo
   this.productName = productNameCoord;
   
   this.hasAllCoordinates = stockNoCoord != undefined && roundedRepurchaseAmtCoord != undefined
-    && repurchaseAmtCoord != undefined && productNameCoord != undefined;
+    && repurchaseAmtCoord != undefined && productNameCoord != undefined
+    && this.stockNo.rowIndex == this.roundedRepurchaseAmt.rowIndex
+    && this.stockNo.rowIndex == this.repurchaseAmt.rowIndex
+    && this.stockNo.rowIndex == this.productName.rowIndex;
 }
 
 var WholesaleHeaders = function(asin, pack, boxAmt, stockNo, productName){

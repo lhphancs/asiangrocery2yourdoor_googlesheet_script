@@ -1,73 +1,31 @@
-function fillRepurchase(e, wholesaleSpreadSheet, wholesaleHeadersObj){
-  var replenishSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var replenishSheetInfo = new SheetInfo(replenishSheet);
-  var replenishHeaderCoordinatesObj = getReplenishHeaderCoordinatesObj(replenishSheetInfo);
-  if(!replenishHeaderCoordinatesObj.hasAllCoordinates)
-    throw("Error: All replenish headers were not found. Check script's global vars");
-  
-  checkEditedCellAndExecuteResponse(e, wholesaleSpreadSheet
-  , wholesaleHeadersObj, replenishSheet, replenishSheetInfo, replenishHeaderCoordinatesObj);
-}
-
-function getReplenishHeaderCoordinatesObj(activeSheetInfo){
-  var asinCoord = getRowColCoordinateOfStr(activeSheetInfo, REPLENISH_HEADER_ASIN);
-  var unitSoldAmtLast30DaysCoord = getRowColCoordinateOfStr(activeSheetInfo, REPLENISH_HEADER_UNIT_SOLD_LAST_30_DAYS);
-  var oosCoord = getRowColCoordinateOfStr(activeSheetInfo, REPLENISH_HEADER_OOS);
-  return new ReplenishHeaderCoordinates(asinCoord, unitSoldAmtLast30DaysCoord, oosCoord);
-}
-
-function checkEditedCellAndExecuteResponse(e, wholesaleSpreadSheet
-, wholesaleHeadersObj, replenishSheet, replenishSheetInfo, replenishHeaderCoordinatesObj){
-  var range = e.range;
-  var editCoordinate = new RowColCoordinate(range.getRow()-1, range.getColumn()-1);
-
-  if(editCoordinate.rowIndex > replenishHeaderCoordinatesObj.oos.rowIndex && editCoordinate.colIndex == replenishHeaderCoordinatesObj.oos.colIndex){
-    var replenishSheetValues = replenishSheetInfo.sheetValues;
-    var editedCellVal = replenishSheetValues[editCoordinate.rowIndex][editCoordinate.colIndex];
-
-    handleOosEditedCellVal(wholesaleSpreadSheet, wholesaleHeadersObj, replenishSheet
-      , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, editedCellVal);
-  }
-  else
-    throw(undefined);
-}
-
 function handleOosEditedCellVal(wholesaleSpreadSheet, wholesaleHeadersObj, replenishSheet
 , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, editedCellVal){
-  if(isSameWord(editedCellVal, REPURCHASE_OOS_ADD_STR) || isSameWord(editedCellVal, REPURCHASE_OOS_Subtract_STR) ){
+  var isAddGreenMode = isSameWord(editedCellVal, REPLENISH_OOS_OPTION_ADD_GREEN_STR);
+  var isAddYellowMode = isSameWord(editedCellVal, REPLENISH_OOS_OPTION_ADD_YELLOW_STR);
+  var isSubtractMode = isSameWord(editedCellVal, REPLENISH_OOS_OPTION_SUBTRACT_STR);
+
+  if(isAddGreenMode || isAddYellowMode || isSubtractMode){
     displayMsgScriptRunning();
-    var lock = LockService.getDocumentLock();
-    try{
-      while( !lock.tryLock(3000) ){
-        continue;
-      }
-      if( isSameWord(editedCellVal, REPURCHASE_OOS_ADD_STR) ){
-        extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
-        , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, true);
-        replenishSheet.getRange(editCoordinate.rowIndex+1, 1, 1, editCoordinate.colIndex+1).setBackground("yellow");
-      }
-        
-      else
-        extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
-        , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, false);
-    }
-    catch(error){
-      throw(error);
-    }
-    finally{
-      lock.releaseLock();
-    }
+    var color = isAddGreenMode ? COLOR_GREEN_STR : isAddYellowMode ? COLOR_YELLOW_STR : null;
+    if(isAddGreenMode || isAddYellowMode)
+      extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
+      , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, true);
+      
+    else
+      extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
+      , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, false);
+    replenishSheet.getRange(editCoordinate.rowIndex+1, 1
+    , 1, replenishHeaderCoordinatesObj.asinListAddOrDelete.colIndex+1).setBackground(color);
   }
-  else
-    throw(undefined);
 }
 
 function extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj, replenishSheetValues
-, replenishHeaderCoordinatesObj, editCoordinate, isAddingBoxes){
+, replenishHeaderCoordinatesObj, editCoordinate, isAddMode){
   var asin = replenishSheetValues[editCoordinate.rowIndex][replenishHeaderCoordinatesObj.asin.colIndex];
   var unitSoldAmtLast30Days = replenishSheetValues[editCoordinate.rowIndex][replenishHeaderCoordinatesObj.unitSoldAmtLast30Days.colIndex];
+  unitSoldAmtLast30Days = unitSoldAmtLast30Days == 0 ? 1 : unitSoldAmtLast30Days; //If 0, pretend it's 1. Makes calculation not equal 0.
 
-  if(asin == '' || asin == undefined)
+  if( isBlankVal(asin) )
     throw("Blank asin for current row");
   else{
     var repurchaseSpreadSheet = SpreadsheetApp.openById(REPURCHASE_SPREADSHEET_ID);
@@ -77,7 +35,7 @@ function extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesale
 
     if( errorMsgsContainer.errorMgs.length == 0 ){
       var repurchaseBoxAmt = calculateBoxAmt(wholesaleData, unitSoldAmtLast30Days);
-      var repurchaseAddAmt = isAddingBoxes ? repurchaseBoxAmt : -repurchaseBoxAmt; //If they typed 'U', then we want to undo(subtract) by repurchaseBoxAmt
+      var repurchaseAddAmt = isAddMode ? repurchaseBoxAmt : -repurchaseBoxAmt;
       
       executeRepurchaseWrite(wholesaleData, repurchaseSpreadSheet, repurchaseAddAmt);
     }
@@ -232,10 +190,12 @@ function clearSheetAndRewrite(repurchaseWholesalerSheet, repurchaseSheetInfo, re
   var i = rowNumberBelowHeader;
   var formattedDate = Utilities.formatDate(new Date(), "PST", "MM/dd/yy HH:mm:ss");
   for(var key in dictStockNoToRepurchaseAmt){
-    repurchaseWholesalerSheet.getRange(i, stockNoCol).setValue(key);
     var repurchaseAmt = dictStockNoToRepurchaseAmt[key].repurchaseAmt;
+    if(repurchaseAmt <= 0)
+      continue;
     var roundedRepurchaseAmt = repurchaseAmt > 0 && repurchaseAmt <= 1 ? 1 : roundPositiveDecimalToOnes(repurchaseAmt, 4);
     var productName = dictStockNoToRepurchaseAmt[key].productName;
+    repurchaseWholesalerSheet.getRange(i, stockNoCol).setValue(key);
     repurchaseWholesalerSheet.getRange(i, roundedRepurchaseAmtCol).setValue(roundedRepurchaseAmt);
     repurchaseWholesalerSheet.getRange(i, repurchaseAmtCol).setValue(repurchaseAmt);
     repurchaseWholesalerSheet.getRange(i, productNameCol).setValue(productName);
