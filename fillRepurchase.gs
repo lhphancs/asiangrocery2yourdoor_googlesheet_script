@@ -6,7 +6,7 @@ function handleOosEditedCellVal(wholesaleSpreadSheet, wholesaleHeadersObj, reple
 
   if(isAddGreenMode || isAddYellowMode || isSubtractMode){
     displayMsgScriptRunning();
-    var color = isAddGreenMode ? COLOR_GREEN_STR : isAddYellowMode ? COLOR_YELLOW_STR : null;
+    var color = isAddGreenMode ? COLOR_GREEN_BKGD : isAddYellowMode ? COLOR_YELLOW_BKGD : null;
     if(isAddGreenMode || isAddYellowMode)
       extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
       , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, true);
@@ -76,10 +76,18 @@ function getWholesaleDataForAsin(wholesaleSpreadSheet, wholesaleHeadersObj, asin
     var headerBoxAmtCoordinate = getRowColCoordinateOfStr(sheetInfo, wholesaleHeadersObj.boxAmt);
     var headerStockNoCoordinate = getRowColCoordinateOfStr(sheetInfo, wholesaleHeadersObj.stockNo);
     var headerProductNameCoordinate = getRowColCoordinateOfStr(sheetInfo, wholesaleHeadersObj.productName);
-    if(headerAsinCoordinate == undefined)
-      continue;
     
-    else
+    var listOfHeadersToCheck = [headerAsinCoordinate, headerPackCoordinate
+                                , headerBoxAmtCoordinate, headerStockNoCoordinate, headerProductNameCoordinate];
+    var allHeadersFound = true;
+    for(var j=0; j<listOfHeadersToCheck.length; ++j){
+      Logger.log(i);
+      if(listOfHeadersToCheck[j] == undefined){
+        allHeadersFound = false;
+        break;
+      }
+    }
+    if(allHeadersFound)
       addWholesaleDataIfAsinFound(wholesaleData, sheetName, sheetInfo, headerAsinCoordinate
       , headerPackCoordinate, headerBoxAmtCoordinate, headerStockNoCoordinate, headerProductNameCoordinate, asin);
   }
@@ -88,6 +96,11 @@ function getWholesaleDataForAsin(wholesaleSpreadSheet, wholesaleHeadersObj, asin
 
 function addWholesaleDataIfAsinFound(wholesaleData, sheetName, sheetInfo, headerAsinCoordinate
 , headerPackCoordinate, headerBoxAmtCoordinate, headerStockNoCoordinate, headerProductNameCoordinate, asin){
+Logger.log("AA");
+  Logger.log(sheetName);
+  Logger.log(headerAsinCoordinate)
+  Logger.log("BB");
+  
   var sheetValues = sheetInfo.sheetValues;
 
   for(var i = headerAsinCoordinate.rowIndex+1; i<sheetInfo.amtRow; ++i){

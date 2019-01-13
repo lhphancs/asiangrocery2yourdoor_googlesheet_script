@@ -35,8 +35,13 @@ function isSameWord(word1, word2){
   return word1.toUpperCase() == word2.toUpperCase();
 }
 
-function cellIsRed(sheet, rowIndex, colIndex){
+function cellColorBkgdHasMatch(colorStrArray, sheet, rowIndex, colIndex){
   var range = sheet.getRange(rowIndex+1, colIndex+1);
   var cellBackgroundColor = range.getBackground();
-  return cellBackgroundColor == '#ff0000';
+
+  for(var i=0; i<colorStrArray.length; ++i)
+    if(colorStrArray[i] == cellBackgroundColor)
+      return true;
+      
+  return false;
 }

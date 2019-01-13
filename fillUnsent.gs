@@ -1,4 +1,5 @@
 function fillUnsent(wholesaleSpreadSheet){
+  var colorsToIgnore = [COLOR_RED_BKGD, COLOR_CYAN_BKGD];
   var asinsSent = getAsinsSent();
   
   var replenishSheet = SpreadsheetApp.getActiveSheet();
@@ -6,7 +7,7 @@ function fillUnsent(wholesaleSpreadSheet){
 
   var replenishHeaderAsinCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_ASIN);
   var asinsCurrentlyOnReplenishSheet = getAsinsCurrentlyOnReplenishSheet(replenishSheetInfo, replenishHeaderAsinCoordinate);
-  var itemsToWrite = getItemsToWrite(wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet);
+  var itemsToWrite = getItemsToWrite(colorsToIgnore, wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet);
 
   writeItems(replenishSheet, replenishSheetInfo, itemsToWrite, replenishHeaderAsinCoordinate);
 }
@@ -47,19 +48,19 @@ function writeItems(replenishSheet, replenishSheetInfo, itemsToWrite, replenishH
   //Now color all written rows
   var amtRowColored = writeRow - startWriteRow;
   if(amtRowColored > 0)
-    replenishSheet.getRange(startWriteRow, 1, amtRowColored, replenishOosCol).setBackground(COLOR_GREY_STR)
+    replenishSheet.getRange(startWriteRow, 1, amtRowColored, replenishOosCol).setBackground(COLOR_GREY_BKGD)
 }
 
-function getItemsToWrite(wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet){
+function getItemsToWrite(colorsToIgnore, wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet){
   var itemsToWrite = {};
   var sheets = wholesaleSpreadSheet.getSheets()
   for(var i = 0; i<sheets.length; ++i)
-    readSheetValuesToCompleteItemsNotSent(sheets[i], asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite);
+    readSheetValuesToCompleteItemsNotSent(colorsToIgnore, sheets[i], asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite);
     
   return itemsToWrite;
 }
 
-function readSheetValuesToCompleteItemsNotSent(sheet, asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite){
+function readSheetValuesToCompleteItemsNotSent(colorsToIgnore, sheet, asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite){
   var sheetInfo = new SheetInfo(sheet);
   var sheetValues = sheetInfo.sheetValues;
   var wholesaleHeaderAsinCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_ASIN);
@@ -71,7 +72,7 @@ function readSheetValuesToCompleteItemsNotSent(sheet, asinsSent, asinsCurrentlyO
     for(var rowIndex = wholesaleHeaderAsinCoordinate.rowIndex + 1; rowIndex < sheetInfo.amtRow; ++rowIndex){
       var asin = sheetValues[rowIndex][wholesaleHeaderAsinCoordinate.colIndex];
       if( !isBlankVal(asin) && !(asin in asinsSent) && !(asin in asinsCurrentlyOnReplenishSheet)
-      && !cellIsRed(sheet, rowIndex, wholesaleHeaderAsinCoordinate.colIndex) ){
+      && !cellColorBkgdHasMatch(colorsToIgnore, sheet, rowIndex, wholesaleHeaderAsinCoordinate.colIndex) ){
         itemsToWrite[asin] = {
           productName: sheetValues[rowIndex][wholesaleHeaderProductNameCoordinate.colIndex]
           , shelfLocation: sheetValues[rowIndex][wholesaleHeaderLocationCoordinate.colIndex]};

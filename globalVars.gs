@@ -51,7 +51,8 @@ var ERROR_DEFAULT_COL_ERROR_MSG = 3;
 var ERROR_DEFAULT_COL_TIMESTAMP = 4;
 
 
-var COLOR_GREEN_STR = '#00ff00';
-var COLOR_RED_STR = '#ff0000';
-var COLOR_YELLOW_STR = 'yellow';
-var COLOR_GREY_STR = '#e8e8e8';
+var COLOR_GREEN_BKGD = '#00ff00';
+var COLOR_RED_BKGD = '#ff0000';
+var COLOR_YELLOW_BKGD = 'yellow';
+var COLOR_GREY_BKGD = '#e8e8e8';
+var COLOR_CYAN_BKGD = '#00ffff';

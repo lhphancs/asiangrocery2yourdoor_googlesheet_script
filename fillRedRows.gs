@@ -14,7 +14,7 @@ function colorRedAsinRows(redAsinSet, replenishSheet, replenishSheetInfo, replen
   for(i = replenishHeaderAsinCoordinate.rowIndex+1; i < replenishSheetInfo.amtRow; ++i){
     var asinCellVal = replenishSheetValues[i][replenishHeaderAsinCoordinate.colIndex];
     if(asinCellVal in redAsinSet){
-      replenishSheet.getRange(i+1, 1, 1, replenishHeaderOssCoordinate.colIndex+1).setBackground(COLOR_RED_STR);
+      replenishSheet.getRange(i+1, 1, 1, replenishHeaderOssCoordinate.colIndex+1).setBackground(COLOR_RED_BKGD);
       replenishSheet.getRange(i+1, replenishHeaderMyCommentCoordinate.colIndex+1).setValue("Check profit before send");
     }
   }
@@ -42,7 +42,7 @@ function readSheetValuesToAddAsins(sheet, sheetInfo, redAsinSet, wholesaleHeader
     var keyCellVal = sheetValues[i][wholesaleHeaderAsinCoordinate.colIndex];
     if(keyCellVal != "" && !(keyCellVal in redAsinSet) ){
       var color = sheet.getRange(i+1, wholesaleHeaderAsinCol).getBackground();
-      if(color == COLOR_RED_STR)
+      if(color == COLOR_RED_BKGD)
         redAsinSet[keyCellVal] = true;
     }
   }
