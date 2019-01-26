@@ -96,11 +96,6 @@ function getWholesaleDataForAsin(wholesaleSpreadSheet, wholesaleHeadersObj, asin
 
 function addWholesaleDataIfAsinFound(wholesaleData, sheetName, sheetInfo, headerAsinCoordinate
 , headerPackCoordinate, headerBoxAmtCoordinate, headerStockNoCoordinate, headerProductNameCoordinate, asin){
-Logger.log("AA");
-  Logger.log(sheetName);
-  Logger.log(headerAsinCoordinate)
-  Logger.log("BB");
-  
   var sheetValues = sheetInfo.sheetValues;
 
   for(var i = headerAsinCoordinate.rowIndex+1; i<sheetInfo.amtRow; ++i){
