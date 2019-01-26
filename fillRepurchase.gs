@@ -81,7 +81,6 @@ function getWholesaleDataForAsin(wholesaleSpreadSheet, wholesaleHeadersObj, asin
                                 , headerBoxAmtCoordinate, headerStockNoCoordinate, headerProductNameCoordinate];
     var allHeadersFound = true;
     for(var j=0; j<listOfHeadersToCheck.length; ++j){
-      Logger.log(i);
       if(listOfHeadersToCheck[j] == undefined){
         allHeadersFound = false;
         break;
