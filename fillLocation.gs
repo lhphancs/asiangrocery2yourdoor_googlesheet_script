@@ -73,7 +73,16 @@ function getDataDict(wholesaleSpreadSheet, WHOLESALE_HEADER_ASIN, writeHeaders, 
     else{
       var dictOfHeadersRowColCoordinate = getDictOfCoordinates(sheetInfo, writeHeaders);
       var dictOfValidHeadersRowColCoordinate = getDictWithValidValuesOnly(dictOfHeadersRowColCoordinate, errorMsgsContainer, sheetInfo.title);
-      readSheetValuesToCompleteDataDict(sheetInfo, dataDict, wholesaleHeaderAsinCoordinate, dictOfValidHeadersRowColCoordinate);
+
+      var allHeadersAreFound = true;
+      for(var j=0; j<writeHeaders.length; ++j){
+        if( !(writeHeaders[j] in dictOfValidHeadersRowColCoordinate) ){
+          allHeadersAreFound = false;
+          break;
+        }
+      }
+      if(allHeadersAreFound)
+        readSheetValuesToCompleteDataDict(sheetInfo, dataDict, wholesaleHeaderAsinCoordinate, dictOfValidHeadersRowColCoordinate);
     }
   }
   return dataDict;
