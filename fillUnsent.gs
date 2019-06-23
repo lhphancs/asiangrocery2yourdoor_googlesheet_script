@@ -1,18 +1,17 @@
-function fillUnsent(wholesaleSpreadSheet){
-  var colorsToIgnore = [COLOR_RED_BKGD, COLOR_CYAN_BKGD];
-  var asinsSent = getAsinsSent();
-  
+function fillUnsent(wholesaleMap){
+  var colorsToIgnore = [COLOR_BKGD_RED, COLOR_BKGD_CYAN];
   var replenishSheet = SpreadsheetApp.getActiveSheet();
   var replenishSheetInfo = new SheetInfo(replenishSheet);
-
   var replenishHeaderAsinCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_ASIN);
-  var asinsCurrentlyOnReplenishSheet = getAsinsCurrentlyOnReplenishSheet(replenishSheetInfo, replenishHeaderAsinCoordinate);
-  var itemsToWrite = getItemsToWrite(colorsToIgnore, wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet);
+  
+  var asinsAlreadySent = getAsinsSent();
+  var replenishSheetAsins = getAsinsInReplenishSheet(replenishSheetInfo, replenishHeaderAsinCoordinate);
+  var itemsToWrite = getItemsToWrite(colorsToIgnore, wholesaleMap, asinsAlreadySent, replenishSheetAsins);
 
   writeItems(replenishSheet, replenishSheetInfo, itemsToWrite, replenishHeaderAsinCoordinate);
 }
 
-function getAsinsCurrentlyOnReplenishSheet(replenishSheetInfo, replenishHeaderAsinCoordinate){
+function getAsinsInReplenishSheet(replenishSheetInfo, replenishHeaderAsinCoordinate){
   var asinsCurrentlyOnReplenishSheet = {};
 
   var sheetValues = replenishSheetInfo.sheetValues;
@@ -28,57 +27,33 @@ function writeItems(replenishSheet, replenishSheetInfo, itemsToWrite, replenishH
   var replenishHeaderProductNameCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_PRODUCT_NAME);
   var replenishHeaderShelfLocationCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_SHELF_LOCATION);
   var replenishHeaderMyCommentCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_MY_COMMENT);
-  var replenishHeaderOssCoordinate = getRowColCoordinateOfStr(replenishSheetInfo, REPLENISH_HEADER_OOS);
-  
-  var replenishAsinCol = replenishHeaderAsinCoordinate.colIndex + 1;
-  var replenishProductNameCol = replenishHeaderProductNameCoordinate.colIndex + 1;
-  var replenishShelfLocationCol = replenishHeaderShelfLocationCoordinate.colIndex + 1;
-  var replenishMyCommentCol = replenishHeaderMyCommentCoordinate.colIndex + 1;
-  var replenishOosCol = replenishHeaderOssCoordinate.colIndex + 1;
   
   var startWriteRow = replenishSheetInfo.amtRow + 1;
   var writeRow = startWriteRow;
   for(var asinKey in itemsToWrite){
-    replenishSheet.getRange(writeRow, replenishAsinCol).setValue(asinKey);
-    replenishSheet.getRange(writeRow, replenishProductNameCol).setValue(itemsToWrite[asinKey].productName);
-    replenishSheet.getRange(writeRow, replenishShelfLocationCol).setValue(itemsToWrite[asinKey].shelfLocation);
-    replenishSheet.getRange(writeRow, replenishMyCommentCol).setValue("Send amtFromHelium / (amtFbaSeller+1)");
+    replenishSheet.getRange(writeRow, replenishHeaderAsinCoordinate.colIndex + 1).setValue(asinKey);
+    replenishSheet.getRange(writeRow, replenishHeaderProductNameCoordinate.colIndex + 1).setValue(itemsToWrite[asinKey].productName);
+    replenishSheet.getRange(writeRow, replenishHeaderShelfLocationCoordinate.colIndex + 1).setValue(itemsToWrite[asinKey].shelfLocation);
+    replenishSheet.getRange(writeRow, replenishHeaderMyCommentCoordinate.colIndex + 1).setValue("Send amtFromHelium / (amtFbaSeller+1)");
     ++writeRow;
   }
   //Now color all written rows
   var amtRowColored = writeRow - startWriteRow;
-  if(amtRowColored > 0)
-    replenishSheet.getRange(startWriteRow, 1, amtRowColored, replenishOosCol).setBackground(COLOR_GREY_BKGD)
+  if(amtRowColored > 0){
+    replenishSheet.getRange(startWriteRow, 1, amtRowColored, replenishSheetInfo.sheetValues[0].length).setBackground(COLOR_BKGD_GREY);
+  }
 }
 
-function getItemsToWrite(colorsToIgnore, wholesaleSpreadSheet, asinsSent, asinsCurrentlyOnReplenishSheet){
+function getItemsToWrite(colorsToIgnore, wholesaleMap, asinsAlreadySent, replenishSheetAsins){
   var itemsToWrite = {};
-  var sheets = wholesaleSpreadSheet.getSheets()
-  for(var i = 0; i<sheets.length; ++i)
-    readSheetValuesToCompleteItemsNotSent(colorsToIgnore, sheets[i], asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite);
-    
-  return itemsToWrite;
-}
 
-function readSheetValuesToCompleteItemsNotSent(colorsToIgnore, sheet, asinsSent, asinsCurrentlyOnReplenishSheet, itemsToWrite){
-  var sheetInfo = new SheetInfo(sheet);
-  var sheetValues = sheetInfo.sheetValues;
-  var wholesaleHeaderAsinCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_ASIN);
-  var wholesaleHeaderProductNameCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_PRODUCT_NAME);
-  var wholesaleHeaderLocationCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_SHELF_LOCATION);
-  
-  if(wholesaleHeaderAsinCoordinate != undefined && wholesaleHeaderProductNameCoordinate != undefined && wholesaleHeaderLocationCoordinate != undefined){
-    // rowIndex has + 1 because we want to skip the header
-    for(var rowIndex = wholesaleHeaderAsinCoordinate.rowIndex + 1; rowIndex < sheetInfo.amtRow; ++rowIndex){
-      var asin = sheetValues[rowIndex][wholesaleHeaderAsinCoordinate.colIndex];
-      if( !isBlankVal(asin) && !(asin in asinsSent) && !(asin in asinsCurrentlyOnReplenishSheet)
-      && !cellColorBkgdHasMatch(colorsToIgnore, sheet, rowIndex, wholesaleHeaderAsinCoordinate.colIndex) ){
-        itemsToWrite[asin] = {
-          productName: sheetValues[rowIndex][wholesaleHeaderProductNameCoordinate.colIndex]
-          , shelfLocation: sheetValues[rowIndex][wholesaleHeaderLocationCoordinate.colIndex]};
-      }
+  for(var wholesaleAsin in wholesaleMap){
+    var wholesaleItem = wholesaleMap[wholesaleAsin];
+    if( !(wholesaleAsin in replenishSheetAsins) && !cellColorBkgdHasMatch(wholesaleItem.color, colorsToIgnore) ){
+      itemsToWrite[wholesaleAsin] = {productName: wholesaleItem.productName, shelfLocation: wholesaleItem.shelfLocation}
     }
   }
+  return itemsToWrite;
 }
 
 function getAsinsSent(){
@@ -90,10 +65,10 @@ function getAsinsSent(){
   var asinCoordinate = getRowColCoordinateOfStr(sheetInfo, ASIN_SENT_HEADER_ASIN);
   
   var sheetValues = sheetInfo.sheetValues;
-  for(i = asinCoordinate.rowIndex+1; i < sheetInfo.amtRow; ++i){
-    var keyCellVal = sheetValues[i][asinCoordinate.colIndex];
-    if(keyCellVal != "")
-      asinsSent[keyCellVal] = true;
+  for(var i = asinCoordinate.rowIndex+1; i < sheetInfo.amtRow; ++i){
+    var asin = sheetValues[i][asinCoordinate.colIndex];
+    if(asin != "")
+      asinsSent[asin] = true;
   }
   return asinsSent;
 }

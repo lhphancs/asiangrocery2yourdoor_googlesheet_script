@@ -32,12 +32,15 @@ function executeFillRepurchase(e){
   fillRepurchase(wholesaleSpreadSheet, e);
 }
 
-function fillLocationsRedRowsAndUnsent(e){
+function fillAll(e){
   var wholesaleSpreadSheet = SpreadsheetApp.openById(READ_WHOLESALE_SPREADSHEET_ID);
+  var wholesaleMap = getWholesaleMap(wholesaleSpreadSheet);
   
-  fillLocation(wholesaleSpreadSheet);
-  fillRedRows(wholesaleSpreadSheet);
-  fillUnsent(wholesaleSpreadSheet);
+  fillLocation(wholesaleMap);
+  fillUnitsSoldLast30DaysIs0AndDaysSupplyIsMoreThanZero();
+  fillRedRows(wholesaleMap);
+  fillUnsent(wholesaleMap);
+  
   displayMsg("Scripts ran successfully!", "Update Complete");
 }
 
@@ -48,7 +51,7 @@ function onBtnFillWhiteRows(e){
 
 function onRunAllScriptsBtn(e){
   displayMsgScriptRunning();
-  executeScript(fillLocationsRedRowsAndUnsent, e);
+  executeScript(fillAll, e);
 }
 
 

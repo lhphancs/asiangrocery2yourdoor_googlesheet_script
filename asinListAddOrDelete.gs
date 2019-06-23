@@ -10,7 +10,7 @@ function handleAsinListEditedCellVal(replenishSheet
   if(isAsinAddMode || isAsinDeleteMode){
     displayMsgScriptRunning();
     
-    var color = isAsinAddMode ? COLOR_GREEN_BKGD : COLOR_GREY_BKGD;
+    var color = isAsinAddMode ? COLOR_BKGD_GREEN : COLOR_BKGD_GREY;
     var asinListSheet = SpreadsheetApp.openById(ASIN_SENT_LIST_SPREADSHEET_ID).getSheets()[0];
     var asinSheetInfo = new SheetInfo(asinListSheet);
     var asinSheetValues = asinSheetInfo.sheetValues;

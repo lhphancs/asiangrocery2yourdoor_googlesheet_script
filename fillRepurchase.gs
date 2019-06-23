@@ -6,7 +6,7 @@ function handleOosEditedCellVal(wholesaleSpreadSheet, wholesaleHeadersObj, reple
 
   if(isAddGreenMode || isAddYellowMode || isSubtractMode){
     displayMsgScriptRunning();
-    var color = isAddGreenMode ? COLOR_GREEN_BKGD : isAddYellowMode ? COLOR_YELLOW_BKGD : null;
+    var color = isAddGreenMode ? COLOR_BKGD_GREEN : isAddYellowMode ? COLOR_BKGD_YELLOW : null;
     if(isAddGreenMode || isAddYellowMode)
       extractRowDataAndExecuteRepurchaseWrite(wholesaleSpreadSheet, wholesaleHeadersObj
       , replenishSheetValues, replenishHeaderCoordinatesObj, editCoordinate, true);
