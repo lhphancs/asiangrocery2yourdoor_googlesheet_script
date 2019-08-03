@@ -192,7 +192,7 @@ function clearSheetAndRewrite(repurchaseWholesalerSheet, repurchaseSheetInfo, re
   var roundedRepurchaseAmtCol = repurchaseHeaderCoordinates.roundedRepurchaseAmt.colIndex + 1;
   var repurchaseAmtCol = repurchaseHeaderCoordinates.repurchaseAmt.colIndex + 1;
   var productNameCol = repurchaseHeaderCoordinates.productName.colIndex + 1;
-  repurchaseWholesalerSheet.deleteRows( rowNumberBelowHeader, repurchaseWholesalerSheet.getLastRow() ); // +1 to convert to row number, and +1 skip headeRow
+  repurchaseWholesalerSheet.deleteRows( rowNumberBelowHeader, repurchaseWholesalerSheet.getLastRow() - 1 );
   
   var i = rowNumberBelowHeader;
   var formattedDate = Utilities.formatDate(new Date(), "PST", "MM/dd/yy HH:mm:ss");

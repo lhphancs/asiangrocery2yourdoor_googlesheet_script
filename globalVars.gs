@@ -9,6 +9,7 @@ var WHOLESALE_HEADER_BOX_AMT = 'box amount';
 var WHOLESALE_HEADER_STOCK_NO = 'stock no.';
 var WHOLESALE_HEADER_PRODUCT_NAME = 'Product Name';
 var WHOLESALE_HEADER_SHELF_LOCATION = 'Shelf Location';
+var WHOLESALE_HEADER_COST = 'Cost Per Listing';
 
 
 var REPLENISH_HEADER_PRODUCT_NAME = 'Product Name';
@@ -17,6 +18,8 @@ var REPLENISH_HEADER_UNIT_SOLD_LAST_30_DAYS = 'Units Sold Last 30 Days';
 var REPLENISH_HEADER_OOS = 'oos';
 var REPLENISH_HEADER_MY_COMMENT = 'My Comment';
 var REPLENISH_HEADER_SHELF_LOCATION = 'Shelf Location';
+var REPLENISH_HEADER_COST = 'Cost Per Listing';
+
 var REPLENISH_HEADER_ASIN_LIST_ADD_OR_DELETE = 'Asin List Add/Delete';
 var REPLENISH_HEADER_TOTAL_UNITS = 'Total Units';
 var REPLENISH_HEADER_DAYS_OF_SUPPLY = 'Days of Supply';

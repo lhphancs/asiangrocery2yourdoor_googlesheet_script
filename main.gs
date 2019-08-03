@@ -36,9 +36,9 @@ function fillAll(e){
   var wholesaleSpreadSheet = SpreadsheetApp.openById(READ_WHOLESALE_SPREADSHEET_ID);
   var wholesaleMap = getWholesaleMap(wholesaleSpreadSheet);
   
-  fillLocation(wholesaleMap);
-  fillUnitsSoldLast30DaysIs0AndDaysSupplyIsMoreThanZero();
+  fillLocationAndCost(wholesaleMap);
   fillRedRows(wholesaleMap);
+  fillUnitsSoldLast30DaysIs0AndDaysSupplyIsMoreThanZero();
   fillUnsent(wholesaleMap);
   
   displayMsg("Scripts ran successfully!", "Update Complete");
