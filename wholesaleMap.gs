@@ -4,6 +4,7 @@ function populateMapForSheet(map, sheet){
   var wholesaleProductNameCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_PRODUCT_NAME);
   var wholesaleShelfLocationCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_SHELF_LOCATION);
   var wholesaleCostCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_COST);
+  var wholesaleCommentCoordinate = getRowColCoordinateOfStr(sheetInfo, WHOLESALE_HEADER_IMPORTANT_COMMENT);
   
   if(wholesaleAsinCoordinate && wholesaleProductNameCoordinate && wholesaleShelfLocationCoordinate){
     var sheetValues = sheetInfo.sheetValues;
@@ -17,8 +18,9 @@ function populateMapForSheet(map, sheet){
       var productName = sheetValues[i][wholesaleProductNameCoordinate.colIndex];
       var shelfLocation = sheetValues[i][wholesaleShelfLocationCoordinate.colIndex];
       var cost = sheetValues[i][wholesaleCostCoordinate.colIndex];
+      var comment = sheetValues[i][wholesaleCommentCoordinate.colIndex];
       var color = sheet.getRange(i+1, wholesaleAsinCoordinate.colIndex).getBackground(); //+1 because counting starts at 1 for getRange
-      map[asin] = {productName: productName, shelfLocation: shelfLocation, cost: cost, color: color};
+      map[asin] = {productName: productName, shelfLocation: shelfLocation, comment: comment, cost: cost, color: color};
     }
   }
 }
