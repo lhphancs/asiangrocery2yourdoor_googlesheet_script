@@ -187,12 +187,19 @@ function getExistingWholesalerDictStockNoToRepurchaseAmt(repurchaseSheetInfo, re
 }
 
 function clearSheetAndRewrite(repurchaseWholesalerSheet, repurchaseSheetInfo, repurchaseHeaderCoordinates, dictStockNoToRepurchaseAmt){
+  var MAX_AMT_OF_ROW_IN_SHEET = 500;
+  
   var rowNumberBelowHeader = repurchaseHeaderCoordinates.stockNo.rowIndex + 2;
   var stockNoCol = repurchaseHeaderCoordinates.stockNo.colIndex + 1;
   var roundedRepurchaseAmtCol = repurchaseHeaderCoordinates.roundedRepurchaseAmt.colIndex + 1;
   var repurchaseAmtCol = repurchaseHeaderCoordinates.repurchaseAmt.colIndex + 1;
   var productNameCol = repurchaseHeaderCoordinates.productName.colIndex + 1;
-  repurchaseWholesalerSheet.deleteRows( rowNumberBelowHeader, repurchaseWholesalerSheet.getLastRow() - 1 );
+  
+  var lastRow = repurchaseWholesalerSheet.getMaxRows();
+  var amtOfRowsToDelete = lastRow - 1;
+  
+  repurchaseWholesalerSheet.insertRowsAfter(lastRow, MAX_AMT_OF_ROW_IN_SHEET);
+  repurchaseWholesalerSheet.deleteRows(rowNumberBelowHeader, amtOfRowsToDelete);
   
   var i = rowNumberBelowHeader;
   var formattedDate = Utilities.formatDate(new Date(), "PST", "MM/dd/yy HH:mm:ss");
